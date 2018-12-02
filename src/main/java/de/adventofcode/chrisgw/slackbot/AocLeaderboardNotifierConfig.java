@@ -7,7 +7,6 @@ import de.adventofcode.chrisgw.slackbot.service.AocLeaderboardNotifier;
 import de.adventofcode.chrisgw.slackbot.service.AocLeaderboardService;
 import de.adventofcode.chrisgw.slackbot.service.AocSlackMessageService;
 import io.reactivex.disposables.Disposable;
-import org.glassfish.jersey.internal.inject.InjectionManagerFactory;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.*;
@@ -15,7 +14,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.ext.ContextResolver;
+import java.time.LocalDate;
 import java.util.Scanner;
 
 
@@ -35,10 +34,11 @@ public class AocLeaderboardNotifierConfig {
             throw new IllegalArgumentException("leaderboardId was unset");
         }
         long leaderboardId = environment.getProperty("leaderboardId", Long.class, 1L);
+        int year = environment.getProperty("year", Integer.class, LocalDate.now().getYear());
         System.out.println(environment.getProperty("sessionId"));
 
         System.out.println("Watching leaderboard with ID: " + leaderboardId);
-        Disposable disposable = aocLeaderboardNotifier.subscribeLeaderboard(leaderboardId);
+        Disposable disposable = aocLeaderboardNotifier.subscribeLeaderboard(year, leaderboardId);
         System.out.println("Press Enter to finish");
         new Scanner(System.in).nextLine(); // block until enter
         disposable.dispose();

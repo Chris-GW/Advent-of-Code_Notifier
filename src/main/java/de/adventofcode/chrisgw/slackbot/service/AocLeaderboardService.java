@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNull;
 @Service
 public class AocLeaderboardService {
 
-    public static final String ADVENT_OF_CODE_LEADERBIARD_URL = "https://adventofcode.com/2017/leaderboard/private/view/{leaderboardId}.json";
+    public static final String ADVENT_OF_CODE_LEADERBIARD_URL = "https://adventofcode.com/{year}/leaderboard/private/view/{leaderboardId}.json";
 
     static final Logger LOG = LoggerFactory.getLogger(AocLeaderboardService.class);
 
@@ -36,10 +36,11 @@ public class AocLeaderboardService {
     }
 
 
-    public Leaderboard fetchAdventOfCodeLeaderboard(long leaderboardId) {
+    public Leaderboard fetchAdventOfCodeLeaderboard(int year, long leaderboardId) {
         LOG.debug("fetchAdventOfCodeLeaderboard with leaderboardId={}", leaderboardId);
         Leaderboard leaderboard = client.target(ADVENT_OF_CODE_LEADERBIARD_URL)
                 .resolveTemplate("leaderboardId", leaderboardId)
+                .resolveTemplate("year", year)
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.COOKIE, sessionCookie)
                 .get(Leaderboard.class);
