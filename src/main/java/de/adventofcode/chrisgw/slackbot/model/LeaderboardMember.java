@@ -1,9 +1,6 @@
 package de.adventofcode.chrisgw.slackbot.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -20,9 +17,8 @@ import java.util.Optional;
 
 @Data
 @XmlRootElement
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @JsonNaming(value = SnakeCaseStrategy.class)
-public class MemberLeaderboardRanking implements Comparable<MemberLeaderboardRanking> {
+public class LeaderboardMember implements Comparable<LeaderboardMember> {
 
     private long id;
     private String name;
@@ -30,7 +26,8 @@ public class MemberLeaderboardRanking implements Comparable<MemberLeaderboardRan
     private int localScore;
     private int globalScore;
 
-    private Instant lastStarTs;
+    @JsonProperty("last_star_ts")
+    private int lastStarTsSeconds;
     private int stars;
 
     @JsonIgnore
@@ -70,7 +67,7 @@ public class MemberLeaderboardRanking implements Comparable<MemberLeaderboardRan
 
 
     @Override
-    public int compareTo(MemberLeaderboardRanking otherMember) {
+    public int compareTo(LeaderboardMember otherMember) {
         return new CompareToBuilder().append(this.getLocalScore(), otherMember.getLocalScore())
                 .append(this.getLastStarTs(), otherMember.getLastStarTs())
                 .append(this.getGlobalScore(), otherMember.getGlobalScore())
@@ -83,6 +80,10 @@ public class MemberLeaderboardRanking implements Comparable<MemberLeaderboardRan
         } else {
             return String.format("(user #%d)", id);
         }
+    }
+
+    public Instant getLastStarTs() {
+        return Instant.ofEpochSecond(lastStarTsSeconds);
     }
 
 }

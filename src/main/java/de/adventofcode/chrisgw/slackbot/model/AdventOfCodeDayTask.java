@@ -3,6 +3,7 @@ package de.adventofcode.chrisgw.slackbot.model;
 import lombok.Data;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,6 +54,16 @@ public class AdventOfCodeDayTask implements Comparable<AdventOfCodeDayTask>, Ite
     public int addNextCompletedLevel(Instant completionTs) {
         completedLevel.add(completionTs);
         return completedLevels();
+    }
+
+
+    public Optional<Duration> neededDurationForLevel(int level) {
+        if (level <= 1 || !hasCompletedLevel(level)) {
+            return Optional.empty();
+        }
+        Instant previousLevelCompletedTs = getCompletedTsForLevel(level - 1);
+        Instant levelCompletedTs = getCompletedTsForLevel(level);
+        return Optional.ofNullable(Duration.between(previousLevelCompletedTs, levelCompletedTs));
     }
 
 

@@ -1,7 +1,10 @@
 package de.adventofcode.chrisgw.slackbot;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
+import com.fasterxml.jackson.databind.introspect.VisibilityChecker.Std;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.adventofcode.chrisgw.slackbot.service.AocLeaderboardNotifier;
 import de.adventofcode.chrisgw.slackbot.service.AocLeaderboardService;
@@ -16,6 +19,10 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import java.time.LocalDate;
 import java.util.Scanner;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.DEFAULT;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
 
 @Configuration
@@ -35,7 +42,6 @@ public class AocLeaderboardNotifierConfig {
         }
         long leaderboardId = environment.getProperty("leaderboardId", Long.class, 1L);
         int year = environment.getProperty("year", Integer.class, LocalDate.now().getYear());
-        System.out.println(environment.getProperty("sessionId"));
 
         System.out.println("Watching leaderboard with ID: " + leaderboardId);
         Disposable disposable = aocLeaderboardNotifier.subscribeLeaderboard(year, leaderboardId);
@@ -58,6 +64,8 @@ public class AocLeaderboardNotifierConfig {
         om.registerModule(new JavaTimeModule());
         om.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
         om.enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        om.enable(SerializationFeature.INDENT_OUTPUT);
+        om.setVisibility(new Std(NONE, NONE, NONE, DEFAULT, ANY));
         return om;
     }
 

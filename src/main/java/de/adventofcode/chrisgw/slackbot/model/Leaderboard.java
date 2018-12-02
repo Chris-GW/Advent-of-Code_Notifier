@@ -1,5 +1,6 @@
 package de.adventofcode.chrisgw.slackbot.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
@@ -13,7 +14,7 @@ import java.util.stream.Stream;
 @Data
 @XmlRootElement
 @JsonNaming(value = SnakeCaseStrategy.class)
-public class Leaderboard implements Iterable<MemberLeaderboardRanking> {
+public class Leaderboard implements Iterable<LeaderboardMember> {
 
     private int event;
     private long ownerId;
@@ -21,11 +22,13 @@ public class Leaderboard implements Iterable<MemberLeaderboardRanking> {
     @Getter(value = AccessLevel.PRIVATE)
     @Setter(value = AccessLevel.PRIVATE)
     @ToString.Exclude
-    private Map<Long, MemberLeaderboardRanking> members = new HashMap<>();
+    @JsonProperty
+    private Map<Long, LeaderboardMember> members = new HashMap<>();
 
 
+    @ToString.Include
     public Instant lastEarnedStarTs() {
-        return members().map(MemberLeaderboardRanking::getLastStarTs)
+        return members().map(LeaderboardMember::getLastStarTs)
                 .max(Comparator.naturalOrder())
                 .orElse(Instant.MIN);
     }
@@ -35,12 +38,17 @@ public class Leaderboard implements Iterable<MemberLeaderboardRanking> {
         return members.size();
     }
 
-    public Optional<MemberLeaderboardRanking> getMemberLeaderboardRanking(long memberId) {
+    public boolean isEmptyLeaderboard() {
+        return memberCount() == 0;
+    }
+
+
+    public Optional<LeaderboardMember> getMemberLeaderboardRanking(long memberId) {
         return Optional.ofNullable(members.get(memberId));
     }
 
-    public MemberLeaderboardRanking putMemberLeaderboardRanking(MemberLeaderboardRanking memberLeaderboardRanking) {
-        return members.put(memberLeaderboardRanking.getId(), memberLeaderboardRanking);
+    public LeaderboardMember addMember(LeaderboardMember leaderboardMember) {
+        return members.put(leaderboardMember.getId(), leaderboardMember);
     }
 
     public boolean containsMember(long memberId) {
@@ -48,12 +56,12 @@ public class Leaderboard implements Iterable<MemberLeaderboardRanking> {
     }
 
 
-    public Stream<MemberLeaderboardRanking> members() {
+    public Stream<LeaderboardMember> members() {
         return members.values().stream();
     }
 
     @Override
-    public Iterator<MemberLeaderboardRanking> iterator() {
+    public Iterator<LeaderboardMember> iterator() {
         return members().sorted().iterator();
     }
 
