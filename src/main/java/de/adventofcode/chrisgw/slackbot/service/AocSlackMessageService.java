@@ -1,6 +1,7 @@
 package de.adventofcode.chrisgw.slackbot.service;
 
 
+import de.adventofcode.chrisgw.slackbot.model.AdventOfCodeDayTask;
 import de.adventofcode.chrisgw.slackbot.model.Leaderboard;
 import de.adventofcode.chrisgw.slackbot.model.MemberLeaderboardRanking;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,11 @@ import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
@@ -19,6 +25,8 @@ import static java.util.Objects.requireNonNull;
 @Slf4j
 @Service
 public class AocSlackMessageService implements LeaderboardMessageService {
+
+    public static final DateTimeFormatter DAY_TASK_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("E. dd.MM. HH:mm");
 
     private String slackWebhookUrl;
     private Client client;
@@ -46,7 +54,7 @@ public class AocSlackMessageService implements LeaderboardMessageService {
 
     private String formatLeaderboardMessage(Leaderboard leaderboard) {
         int longestName = leaderboard.members()
-                .map(MemberLeaderboardRanking::getName)
+                .map(MemberLeaderboardRanking::getPrintName)
                 .filter(Objects::nonNull)
                 .mapToInt(String::length)
                 .max()
@@ -55,13 +63,24 @@ public class AocSlackMessageService implements LeaderboardMessageService {
         StringBuilder sb = new StringBuilder("{\"text\": \"```");
         int platzierung = 1;
         for (MemberLeaderboardRanking memberLeaderboardRanking : leaderboard) {
-            String username = memberLeaderboardRanking.getName();
+            String username = memberLeaderboardRanking.getPrintName();
             int punkte = memberLeaderboardRanking.getLocalScore();
             int stars = memberLeaderboardRanking.getStars();
-            sb.append(String.format("%2d) %" + longestName + "s\t%3d Punkte, %2d Sterne\n", //
-                    platzierung++, username, punkte, stars));
+            String letzteAufgabeStr = memberLeaderboardRanking.getLastFinishedDayTask()
+                    .map(this::formatLastFinishedDayTask)
+                    .orElse("");
+            sb.append(String.format("%2d) %3d Punkte, %2d Sterne %" + longestName + "s\t%s\n", //
+                    platzierung++, punkte, stars, username, letzteAufgabeStr));
         }
         return sb.append("```\"}").toString();
+    }
+
+    private String formatLastFinishedDayTask(AdventOfCodeDayTask dayTask) {
+        LocalDateTime complitionTime = LocalDateTime.ofInstant(dayTask.getLastComplitionTime(), ZoneId.systemDefault());
+        String formattedComplitionTime = DAY_TASK_DATE_TIME_PATTERN.format(complitionTime);
+        char levelChar = (char) ('a' + dayTask.completedLevels() - 1);
+        return String.format("Tag %d. %c) am %s", //
+                dayTask.getDay(), levelChar, formattedComplitionTime);
     }
 
 

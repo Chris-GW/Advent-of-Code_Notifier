@@ -12,6 +12,7 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -48,6 +49,9 @@ public class MemberLeaderboardRanking implements Comparable<MemberLeaderboardRan
         });
     }
 
+    public Optional<AdventOfCodeDayTask> getLastFinishedDayTask() {
+        return completedDays.values().stream().max(Comparator.comparing(AdventOfCodeDayTask::getLastComplitionTime));
+    }
 
     private Optional<Instant> getCompletionDayLevel(int day, int level) {
         JsonNode completionDayLevel = completionDayLevelPath(day, level).path("get_star_ts");
@@ -71,6 +75,14 @@ public class MemberLeaderboardRanking implements Comparable<MemberLeaderboardRan
                 .append(this.getLastStarTs(), otherMember.getLastStarTs())
                 .append(this.getGlobalScore(), otherMember.getGlobalScore())
                 .toComparison() * -1;
+    }
+
+    public String getPrintName() {
+        if (name != null) {
+            return name;
+        } else {
+            return String.format("(user #%d)", id);
+        }
     }
 
 }

@@ -45,7 +45,7 @@ public class AocLeaderboardNotifier {
         } else {
             aocYear = year;
         }
-        
+
         return registerdLeaderbaords.computeIfAbsent(leaderboardId, key -> {
             return BehaviorSubject.interval(0L, 10L, TimeUnit.MINUTES)
                     .map(interval -> leaderboardService.fetchAdventOfCodeLeaderboard(aocYear, leaderboardId))

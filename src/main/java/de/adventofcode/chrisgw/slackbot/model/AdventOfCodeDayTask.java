@@ -36,16 +36,16 @@ public class AdventOfCodeDayTask implements Comparable<AdventOfCodeDayTask>, Ite
         return completedLevels() == DAY_TASK_LEVELS;
     }
 
-
-    public Optional<Instant> getCompletedTsForLevel(int level) {
-        if (hasCompletedLevel(level)) {
-            return Optional.of(completedLevel.get(level - 1));
-        } else {
-            return Optional.empty();
-        }
+    public boolean hasCompletedAnyLevels() {
+        return completedLevels() > 0;
     }
 
-    public Optional<Instant> getLastComplitionTime() {
+
+    public Instant getCompletedTsForLevel(int level) {
+        return completedLevel.get(level - 1);
+    }
+
+    public Instant getLastComplitionTime() {
         return getCompletedTsForLevel(completedLevels());
     }
 
@@ -66,16 +66,14 @@ public class AdventOfCodeDayTask implements Comparable<AdventOfCodeDayTask>, Ite
     public int compareTo(AdventOfCodeDayTask otherDayTask) {
         return new CompareToBuilder().append(this.getDay(), otherDayTask.getDay())
                 .append(this.completedLevels(), otherDayTask.completedLevels())
-                .append(this.getLastComplitionTime().orElse(Instant.MIN),
-                        otherDayTask.getLastComplitionTime().orElse(Instant.MIN))
+                .append(this.getLastComplitionTime(), otherDayTask.getLastComplitionTime())
                 .toComparison();
     }
 
     @Override
     public String toString() {
         int latestLevel = completedLevels();
-        return String.format("%2d:%1d@%s", day, latestLevel,
-                getCompletedTsForLevel(latestLevel).orElseThrow(RuntimeException::new));
+        return String.format("%2d:%1d@%s", day, latestLevel, getCompletedTsForLevel(latestLevel));
     }
 
 }
