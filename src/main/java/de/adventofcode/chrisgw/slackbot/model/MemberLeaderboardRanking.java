@@ -1,4 +1,4 @@
-package de.adventofcode.chrisgw.slackbot;
+package de.adventofcode.chrisgw.slackbot.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
