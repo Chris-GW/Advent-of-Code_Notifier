@@ -36,10 +36,10 @@ public class LeaderboardMember implements Comparable<LeaderboardMember> {
 
     @JsonSetter("completion_day_level")
     public void setCompletedDays(JsonNode completedDayLevelRootNode) {
-        completedDayLevelRootNode.elements().forEachRemaining(completedDayLevelNode -> {
-            int day = Integer.parseInt(completedDayLevelNode.fieldNames().next());
+        completedDayLevelRootNode.fields().forEachRemaining(dayJsonNode -> {
+            int day = Integer.parseInt(dayJsonNode.getKey());
             AdventOfCodeDayTask adventOfCodeDayTask = new AdventOfCodeDayTask(day);
-            completedDayLevelNode.elements().forEachRemaining(completedLevelNode -> {
+            dayJsonNode.getValue().elements().forEachRemaining(completedLevelNode -> {
                 Instant completionInstant = Instant.ofEpochSecond(completedLevelNode.path("get_star_ts").asLong());
                 adventOfCodeDayTask.addNextCompletedLevel(completionInstant);
             });

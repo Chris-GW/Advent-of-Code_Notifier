@@ -31,7 +31,7 @@ import static java.util.Objects.requireNonNull;
 public class AocSlackMessageService implements LeaderboardMessageService {
 
     public static final DateTimeFormatter DAY_TASK_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern(
-            "E. dd.MM. um HH:mm");
+            "E. dd.MM. 'um' HH:mm");
 
     private String slackWebhookUrl;
     private Client client;
@@ -75,15 +75,14 @@ public class AocSlackMessageService implements LeaderboardMessageService {
         StringBuilder sb = new StringBuilder();
         int platzierung = 1;
         sb.append(String.format("AoC y=%04d       1111111111222222\n", leaderboard.getEvent()));
-        sb.append(
-                "##)     \u0031\u0032\u0033\u0034\u0035\u0036\u0037\u0038\u0039\u0030\u0031\u0032\u0033\u0034\u0035\u0036\u0037\u0038\u0039\u0030\u0031\u0032\u0033\u0034\u0035\n");
+        sb.append("##)     1234567890123456789012345\n");
         for (LeaderboardMember member : leaderboard) {
             String printName = member.getPrintName();
             int punkte = member.getLocalScore();
             CharSequence completedStarsStr = formatCompletedDayTasks(leaderboardChange, member);
             String letzteAufgabeStr = member.getLastFinishedDayTask().map(this::formatLastFinishedDayTask).orElse("");
             String neuerungPlatzierungStr = formatNeuerungPlatzierung(leaderboardChange, member);
-            sb.append(String.format("%2d) %3d %25s %" + longestName + "s %s %s\n", //
+            sb.append(String.format("%2d) %3d %25s \t%" + longestName + "s %s %s\n", //
                     platzierung++, punkte, completedStarsStr, printName, letzteAufgabeStr, neuerungPlatzierungStr));
         }
         return sb.insert(0, "```").append("```").toString();
@@ -133,9 +132,9 @@ public class AocSlackMessageService implements LeaderboardMessageService {
     private String asLevelStar(AdventOfCodeDayTask dayTask) {
         int completedLevels = dayTask.completedLevels();
         if (completedLevels == 0) {
-            return "\u2606"; // white star ☆
+            return "-";
         } else if (completedLevels == 1) {
-            return "\u272F"; // PINWHEEL STAR ✯
+            return "\u2606"; // white star ☆
         } else {
             return "\u2605"; // black star ★
         }
