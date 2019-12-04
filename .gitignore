@@ -158,3 +158,6 @@ local.properties
 hs_err_pid*
 
 /aocLeaderboards
+LeaderboardMemberNames.json
+.idea/
+

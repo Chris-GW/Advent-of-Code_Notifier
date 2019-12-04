@@ -6,15 +6,19 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.time.Instant;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Stream;
+
+import static java.time.Month.DECEMBER;
 
 
 @Data
 @XmlRootElement
 @JsonNaming(value = SnakeCaseStrategy.class)
 public class Leaderboard implements Iterable<LeaderboardMember> {
+
+    public static final LocalTime DAY_TASK_START_TIME = LocalTime.of(6, 0);
 
     private int event;
     private long ownerId;
@@ -28,9 +32,24 @@ public class Leaderboard implements Iterable<LeaderboardMember> {
 
     @ToString.Include
     public Instant lastEarnedStarTs() {
-        return members().map(LeaderboardMember::getLastStarTs)
-                .max(Comparator.naturalOrder())
-                .orElse(Instant.MIN);
+        return members().map(LeaderboardMember::getLastStarTs).max(Comparator.naturalOrder()).orElse(Instant.MIN);
+    }
+
+
+    public int rankingFor(LeaderboardMember member) {
+        Iterator<LeaderboardMember> memberIterator = iterator();
+        for (int rank = 0; memberIterator.hasNext(); rank++) {
+            LeaderboardMember nextMember = memberIterator.next();
+            if (member.getId() == nextMember.getId()) {
+                return rank;
+            }
+        }
+        return Integer.MAX_VALUE;
+    }
+
+
+    public LocalDateTime unlockTimeForDayTask(int day) {
+        return LocalDate.of(event, DECEMBER, day).atTime(DAY_TASK_START_TIME);
     }
 
 
@@ -43,7 +62,7 @@ public class Leaderboard implements Iterable<LeaderboardMember> {
     }
 
 
-    public Optional<LeaderboardMember> getMemberLeaderboardRanking(long memberId) {
+    public Optional<LeaderboardMember> getMemberForId(long memberId) {
         return Optional.ofNullable(members.get(memberId));
     }
 

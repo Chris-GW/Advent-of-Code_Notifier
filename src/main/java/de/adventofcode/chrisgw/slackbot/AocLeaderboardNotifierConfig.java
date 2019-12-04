@@ -1,9 +1,7 @@
 package de.adventofcode.chrisgw.slackbot;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
 import com.fasterxml.jackson.databind.introspect.VisibilityChecker.Std;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import de.adventofcode.chrisgw.slackbot.service.AocLeaderboardNotifier;
@@ -20,9 +18,7 @@ import javax.ws.rs.client.ClientBuilder;
 import java.time.LocalDate;
 import java.util.Scanner;
 
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.DEFAULT;
-import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.*;
 
 
 @Configuration

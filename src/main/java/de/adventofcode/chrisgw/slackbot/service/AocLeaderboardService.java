@@ -1,19 +1,23 @@
 package de.adventofcode.chrisgw.slackbot.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adventofcode.chrisgw.slackbot.model.Leaderboard;
+import de.adventofcode.chrisgw.slackbot.model.LeaderboardMember;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Qualifier;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 
@@ -24,28 +28,36 @@ public class AocLeaderboardService {
 
     public static final String ADVENT_OF_CODE_LEADERBIARD_URL = "https://adventofcode.com/{year}/leaderboard/private/view/{leaderboardId}.json";
 
-    static final Logger LOG = LoggerFactory.getLogger(AocLeaderboardService.class);
-
     private Client client;
+    private ObjectMapper om;
     private Cookie sessionCookie;
+    private Map<String, String> memberNames = new HashMap<>();
 
 
     @Inject
-    public AocLeaderboardService(Client client) {
+    public AocLeaderboardService(Client client, ObjectMapper om) {
         this.client = requireNonNull(client);
+        this.om = requireNonNull(om);
     }
 
 
     public Leaderboard fetchAdventOfCodeLeaderboard(int year, long leaderboardId) {
-        LOG.debug("fetchAdventOfCodeLeaderboard with leaderboardId={}", leaderboardId);
+        log.debug("fetchAdventOfCodeLeaderboard with leaderboardId={}", leaderboardId);
         Leaderboard leaderboard = client.target(ADVENT_OF_CODE_LEADERBIARD_URL)
                 .resolveTemplate("leaderboardId", leaderboardId)
                 .resolveTemplate("year", year)
                 .request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.COOKIE, sessionCookie)
                 .get(Leaderboard.class);
-        LOG.debug("fetchAdventOfCodeLeaderboard success: {}", leaderboard);
+        leaderboard.members().forEach(this::setPrintName);
+        log.debug("fetchAdventOfCodeLeaderboard success: {}", leaderboard);
         return leaderboard;
+    }
+
+    private void setPrintName(LeaderboardMember member) {
+        String name = member.getName();
+        String printName = memberNames.getOrDefault(name, null);
+        member.setPrintName(printName);
     }
 
 
@@ -54,5 +66,19 @@ public class AocLeaderboardService {
         this.sessionCookie = new Cookie("session", sessionId);
     }
 
+
+    @Value("${memberNamesJsonFilePath}")
+    public void setMemberNamesResource(Resource memberNamesResource) {
+        try (InputStream inputStream = memberNamesResource.getInputStream()) {
+            JsonNode rootNode = om.readTree(inputStream);
+            for (JsonNode jsonNode : rootNode) {
+                String userName = jsonNode.path("userName").asText();
+                String name = jsonNode.path("name").asText();
+                memberNames.put(userName, name);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }

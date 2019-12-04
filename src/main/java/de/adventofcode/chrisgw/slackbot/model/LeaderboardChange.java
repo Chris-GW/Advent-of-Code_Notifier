@@ -27,7 +27,7 @@ public class LeaderboardChange {
         if (previousLeaderboard == null || previousLeaderboard.isEmptyLeaderboard()) {
             return Stream.empty();
         }
-        return currentLeaderboard.getMemberLeaderboardRanking(memberId)
+        return currentLeaderboard.getMemberForId(memberId)
                 .map(LeaderboardMember::getCompletedDays)
                 .map(Map::values)
                 .map(Collection::stream)
@@ -39,7 +39,7 @@ public class LeaderboardChange {
         if (previousLeaderboard == null) {
             return false;
         }
-        Instant previousLastStarTs = previousLeaderboard.getMemberLeaderboardRanking(memberId)
+        Instant previousLastStarTs = previousLeaderboard.getMemberForId(memberId)
                 .map(LeaderboardMember::getLastStarTs)
                 .orElse(Instant.MIN);
         return dayTask.getLastComplitionTime().isAfter(previousLastStarTs);

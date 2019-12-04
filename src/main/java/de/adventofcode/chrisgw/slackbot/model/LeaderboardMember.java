@@ -22,6 +22,7 @@ public class LeaderboardMember implements Comparable<LeaderboardMember> {
 
     private long id;
     private String name;
+    private String printName;
 
     private int localScore;
     private int globalScore;
@@ -50,19 +51,9 @@ public class LeaderboardMember implements Comparable<LeaderboardMember> {
         return completedDays.values().stream().max(Comparator.comparing(AdventOfCodeDayTask::getLastComplitionTime));
     }
 
-    private Optional<Instant> getCompletionDayLevel(int day, int level) {
-        JsonNode completionDayLevel = completionDayLevelPath(day, level).path("get_star_ts");
-        if (completionDayLevel.isValueNode()) {
-            Instant completionInstant = Instant.ofEpochSecond(completionDayLevel.asLong());
-            return Optional.of(completionInstant);
-        } else {
-            return Optional.empty();
-        }
-    }
 
-    private JsonNode completionDayLevelPath(int day, int level) {
-        JsonNode completionDayLevel = null;
-        return completionDayLevel.path(String.valueOf(day)).path(String.valueOf(level));
+    public Optional<AdventOfCodeDayTask> dayTaskFor(int day) {
+        return Optional.ofNullable(completedDays.get(day));
     }
 
 
@@ -75,7 +66,9 @@ public class LeaderboardMember implements Comparable<LeaderboardMember> {
     }
 
     public String getPrintName() {
-        if (name != null) {
+        if (printName != null) {
+            return printName;
+        } else if (name != null) {
             return name;
         } else {
             return String.format("(user #%d)", id);

@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +30,8 @@ import static java.util.Objects.requireNonNull;
 @Service
 public class AocSlackMessageService implements LeaderboardMessageService {
 
-    public static final DateTimeFormatter DAY_TASK_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern("E. dd.MM. HH:mm");
+    public static final DateTimeFormatter DAY_TASK_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern(
+            "E. dd.MM. um HH:mm");
 
     private String slackWebhookUrl;
     private Client client;
@@ -45,7 +47,7 @@ public class AocSlackMessageService implements LeaderboardMessageService {
     @Override
     public void sendLeaderboardChangeMessage(LeaderboardChange leaderboardChange) {
         try {
-            String leaderboardMessage = formatLeaderboardMessage(leaderboardChange.getCurrentLeaderboard());
+            String leaderboardMessage = formatLeaderboardMessage(leaderboardChange);
             String leaderboardChangeMessage = formatLeaderboardChangeMessage(leaderboardChange);
             String message = "{\"text\": \"" + leaderboardMessage + "\n" + leaderboardChangeMessage + "\"}";
             log.debug("sendLeaderboardChangeMessage: {}", message);
@@ -56,48 +58,100 @@ public class AocSlackMessageService implements LeaderboardMessageService {
         }
     }
 
-    private String formatLeaderboardMessage(Leaderboard leaderboard) {
-        int longestName = leaderboard.members()
+    private int findLongestName(Leaderboard leaderboard) {
+        return leaderboard.members()
                 .map(LeaderboardMember::getPrintName)
                 .filter(Objects::nonNull)
                 .mapToInt(String::length)
                 .max()
                 .orElse(6);
+    }
+
+
+    private String formatLeaderboardMessage(LeaderboardChange leaderboardChange) {
+        Leaderboard leaderboard = leaderboardChange.getCurrentLeaderboard();
+        int longestName = findLongestName(leaderboard);
 
         StringBuilder sb = new StringBuilder();
         int platzierung = 1;
-        for (LeaderboardMember leaderboardMember : leaderboard) {
-            String username = leaderboardMember.getPrintName();
-            int punkte = leaderboardMember.getLocalScore();
-            int stars = leaderboardMember.getStars();
-            String letzteAufgabeStr = leaderboardMember.getLastFinishedDayTask()
-                    .map(this::formatLastFinishedDayTask)
-                    .orElse("");
-            sb.append(String.format("%2d) %3d Punkte, %2d Sterne %" + longestName + "s\t%s\n", //
-                    platzierung++, punkte, stars, username, letzteAufgabeStr));
+        sb.append(String.format("AoC y=%04d       1111111111222222\n", leaderboard.getEvent()));
+        sb.append(
+                "##)     \u0031\u0032\u0033\u0034\u0035\u0036\u0037\u0038\u0039\u0030\u0031\u0032\u0033\u0034\u0035\u0036\u0037\u0038\u0039\u0030\u0031\u0032\u0033\u0034\u0035\n");
+        for (LeaderboardMember member : leaderboard) {
+            String printName = member.getPrintName();
+            int punkte = member.getLocalScore();
+            CharSequence completedStarsStr = formatCompletedDayTasks(leaderboardChange, member);
+            String letzteAufgabeStr = member.getLastFinishedDayTask().map(this::formatLastFinishedDayTask).orElse("");
+            String neuerungPlatzierungStr = formatNeuerungPlatzierung(leaderboardChange, member);
+            sb.append(String.format("%2d) %3d %25s %" + longestName + "s %s %s\n", //
+                    platzierung++, punkte, completedStarsStr, printName, letzteAufgabeStr, neuerungPlatzierungStr));
         }
         return sb.insert(0, "```").append("```").toString();
     }
 
+    private CharSequence formatCompletedDayTasks(LeaderboardChange leaderboardChange, LeaderboardMember member) {
+        StringBuilder sb = new StringBuilder(25);
+        for (int day = 1; day <= 25; day++) {
+            if (!isUnlockedDayTask(leaderboardChange, day)) {
+                sb.append(" ");
+            } else {
+                AdventOfCodeDayTask dayTask = member.dayTaskFor(day).orElse(new AdventOfCodeDayTask(day));
+                sb.append(asLevelStar(dayTask));
+            }
+        }
+        return sb;
+    }
+
+    private boolean isUnlockedDayTask(LeaderboardChange leaderboardChange, int day) {
+        Leaderboard currentLeaderboard = leaderboardChange.getCurrentLeaderboard();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime unlockTime = currentLeaderboard.unlockTimeForDayTask(day);
+        return now.isAfter(unlockTime);
+    }
+
+    private String formatNeuerungPlatzierung(LeaderboardChange leaderboardChange, LeaderboardMember member) {
+        int currentRanking = leaderboardChange.getCurrentLeaderboard().rankingFor(member);
+        int previousRanking = currentRanking;
+        if (leaderboardChange.getPreviousLeaderboard() != null) {
+            previousRanking = leaderboardChange.getPreviousLeaderboard().rankingFor(member);
+        }
+        if (currentRanking == previousRanking) {
+            return "";
+        } else if (currentRanking > previousRanking) {
+            return "\u2191"; // upwards arrow ↑
+        } else {
+            return "\u2193"; // downward arrow ↓
+        }
+    }
+
     private String formatLastFinishedDayTask(AdventOfCodeDayTask dayTask) {
-        LocalDateTime complitionTime = LocalDateTime.ofInstant(dayTask.getLastComplitionTime(), ZoneId.systemDefault());
-        String formattedComplitionTime = DAY_TASK_DATE_TIME_PATTERN.format(complitionTime);
-        char levelChar = (char) ('a' + dayTask.completedLevels() - 1);
-        return String.format("Tag %d. %c) am %s", //
-                dayTask.getDay(), levelChar, formattedComplitionTime);
+        String formattedComplitionTime = formatLastComplitionTime(dayTask);
+        return String.format("Tag %2d. %s am %s", //
+                dayTask.getDay(), asLevelStar(dayTask), formattedComplitionTime);
+    }
+
+    private String asLevelStar(AdventOfCodeDayTask dayTask) {
+        int completedLevels = dayTask.completedLevels();
+        if (completedLevels == 0) {
+            return "\u2606"; // white star ☆
+        } else if (completedLevels == 1) {
+            return "\u272F"; // PINWHEEL STAR ✯
+        } else {
+            return "\u2605"; // black star ★
+        }
     }
 
 
     private String formatLeaderboardChangeMessage(LeaderboardChange leaderboardChange) {
         StringBuilder sb = new StringBuilder();
-        sb.append("*Neu beendete Aufgaben seit ")
+        sb.append("*Neu beendete Aufgaben bis ")
                 .append(DAY_TASK_DATE_TIME_PATTERN.format(LocalDateTime.now()))
                 .append(":*\n");
 
         leaderboardChange.getCurrentLeaderboard()
                 .members()
-                .sorted(Comparator.comparing(LeaderboardMember::getPrintName))
                 .filter(member -> leaderboardChange.newFinishedDayTasks(member.getId()).findAny().isPresent())
+                .sorted(Comparator.comparing(LeaderboardMember::getPrintName))
                 .forEachOrdered(member -> {
                     sb.append("*").append(member.getPrintName()).append("* beendeten Aufgaben:\n");
                     sb.append(fomartMemberChanges(leaderboardChange.newFinishedDayTasks(member.getId()))).append("\n");
@@ -108,15 +162,18 @@ public class AocSlackMessageService implements LeaderboardMessageService {
     private String fomartMemberChanges(Stream<AdventOfCodeDayTask> newFinishedDayTasks) {
         StringBuilder sb = new StringBuilder();
         newFinishedDayTasks.sorted().forEachOrdered(dayTask -> {
-            LocalDateTime complitionTime = LocalDateTime.ofInstant(dayTask.getLastComplitionTime(),
-                    ZoneId.systemDefault());
-            String formattedComplitionTime = DAY_TASK_DATE_TIME_PATTERN.format(complitionTime);
-            char levelChar = (char) ('a' + dayTask.completedLevels() - 1);
-
-            sb.append("- ").append(dayTask.getDay()).append(". ").append(levelChar);
-            sb.append(") am ").append(formattedComplitionTime).append("\n");
+            String formattedComplitionTime = formatLastComplitionTime(dayTask);
+            sb.append("- ").append(dayTask.getDay()).append(". ").append(asLevelStar(dayTask));
+            sb.append(" am ").append(formattedComplitionTime).append("\n");
         });
         return sb.toString().trim();
+    }
+
+
+    private static String formatLastComplitionTime(AdventOfCodeDayTask dayTask) {
+        Instant lastComplitionTime = dayTask.getLastComplitionTime();
+        LocalDateTime complitionTime = LocalDateTime.ofInstant(lastComplitionTime, ZoneId.systemDefault());
+        return DAY_TASK_DATE_TIME_PATTERN.format(complitionTime);
     }
 
 
