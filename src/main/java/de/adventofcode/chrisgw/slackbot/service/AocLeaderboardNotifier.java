@@ -46,12 +46,7 @@ public class AocLeaderboardNotifier {
 
     public synchronized Disposable subscribeLeaderboard(int year, long leaderboardId) {
         LocalDate currentAocDate = currentAocDate();
-        final int aocYear;
-        if (year > currentAocDate.getYear()) {
-            aocYear = currentAocDate.getYear();
-        } else {
-            aocYear = year;
-        }
+        final int aocYear = Math.min(year, currentAocDate.getYear());
 
         return registerdLeaderbaords.computeIfAbsent(leaderboardId, key -> {
             LeaderboardChange initialLeaderboardChange = loadLeaderboardChange(year, leaderboardId);

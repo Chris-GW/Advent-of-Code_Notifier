@@ -117,9 +117,9 @@ public class AocSlackMessageService implements LeaderboardMessageService {
         if (currentRanking == previousRanking) {
             return "";
         } else if (currentRanking > previousRanking) {
-            return "\u2191"; // upwards arrow ↑
-        } else {
             return "\u2193"; // downward arrow ↓
+        } else {
+            return "\u2191"; // upwards arrow ↑
         }
     }
 
