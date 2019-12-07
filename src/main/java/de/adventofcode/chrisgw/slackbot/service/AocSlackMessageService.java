@@ -119,7 +119,7 @@ public class AocSlackMessageService implements LeaderboardMessageService {
         }
         if (currentRanking == previousRanking && leaderboardChange.hasChanged(member.getId())) {
             return "*";
-        } else if (currentRanking == previousRanking) {
+        } else if (currentRanking == previousRanking || previousRanking == Integer.MAX_VALUE) {
             return " ";
         } else if (currentRanking > previousRanking) {
             return "\u2193"; // downward arrow ↓
