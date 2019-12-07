@@ -36,7 +36,7 @@ public class AocLeaderboardNotifierConfig {
         if (!environment.containsProperty("leaderboardId")) {
             throw new IllegalArgumentException("leaderboardId was unset");
         }
-        long leaderboardId = environment.getProperty("leaderboardId", Long.class, 1L);
+        long leaderboardId = environment.getRequiredProperty("leaderboardId", Long.class);
         int year = environment.getProperty("year", Integer.class, LocalDate.now().getYear());
 
         System.out.println("Watching leaderboard with ID: " + leaderboardId);
@@ -44,6 +44,7 @@ public class AocLeaderboardNotifierConfig {
         System.out.println("Press Enter to finish");
         new Scanner(System.in).nextLine(); // block until enter
         disposable.dispose();
+        System.out.println("finished");
     }
 
 

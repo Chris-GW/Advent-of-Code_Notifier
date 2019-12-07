@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import de.adventofcode.chrisgw.slackbot.model.Leaderboard;
 import de.adventofcode.chrisgw.slackbot.model.LeaderboardMember;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -63,12 +64,19 @@ public class AocLeaderboardService {
 
     @Value("${sessionId}")
     public void setSessionIdCookie(String sessionId) {
+        if (StringUtils.isEmpty(sessionId)) {
+            throw new IllegalArgumentException("Expect non empty sessionId: " + sessionId);
+        }
         this.sessionCookie = new Cookie("session", sessionId);
     }
 
 
-    @Value("${memberNamesJsonFilePath}")
+    @Value( "${memberNamesJsonFilePath}")
     public void setMemberNamesResource(Resource memberNamesResource) {
+        if (!memberNamesResource.isReadable()) {
+            log.warn("could not read memberNames from: " + memberNamesResource);
+            return;
+        }
         try (InputStream inputStream = memberNamesResource.getInputStream()) {
             JsonNode rootNode = om.readTree(inputStream);
             for (JsonNode jsonNode : rootNode) {

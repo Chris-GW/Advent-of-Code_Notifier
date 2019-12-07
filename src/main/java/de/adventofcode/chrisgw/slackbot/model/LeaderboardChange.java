@@ -50,4 +50,17 @@ public class LeaderboardChange {
                 .equals(previousLeaderboard.lastEarnedStarTs());
     }
 
+    public boolean hasChanged(long memberId) {
+        if (previousLeaderboard == null) {
+            return false;
+        }
+        Instant lastChange = currentLeaderboard.getMemberForId(memberId)
+                .map(LeaderboardMember::getLastStarTs)
+                .orElse(Instant.MIN);
+        Instant previousLastChange = previousLeaderboard.getMemberForId(memberId)
+                .map(LeaderboardMember::getLastStarTs)
+                .orElse(Instant.MIN);
+        return !lastChange.equals(previousLastChange);
+    }
+
 }
