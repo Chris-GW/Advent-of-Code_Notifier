@@ -5,6 +5,7 @@ import de.adventofcode.chrisgw.slackbot.model.AdventOfCodeDayTask;
 import de.adventofcode.chrisgw.slackbot.model.Leaderboard;
 import de.adventofcode.chrisgw.slackbot.model.LeaderboardChange;
 import de.adventofcode.chrisgw.slackbot.model.LeaderboardMember;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,15 +15,19 @@ import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.StatusType;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static javax.ws.rs.client.Entity.entity;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
 @Slf4j
@@ -47,13 +52,25 @@ public class AocSlackMessageService implements LeaderboardMessageService {
         try {
             String leaderboardMessage = formatLeaderboardMessage(leaderboardChange);
             String leaderboardChangeMessage = formatLeaderboardChangeMessage(leaderboardChange);
-            String message = "{\"text\": \"" + leaderboardMessage + "\n" + leaderboardChangeMessage + "\"}";
-            log.debug("sendLeaderboardChangeMessage: {}", message);
-            Response postMessageResponse = client.target(slackWebhookUrl).request().post(Entity.text(message));
-            log.debug("sendLeaderboardChangeMessage {}", postMessageResponse.getStatusInfo());
+            Response postMessageResponse = postSlackMessage(leaderboardMessage + "\n" + leaderboardChangeMessage);
+            StatusType statusInfo = postMessageResponse.getStatusInfo();
+            if (!Status.OK.equals(statusInfo)) {
+                log.error("sendLeaderboardChangeMessage {}", statusInfo);
+            } else {
+                log.debug("sendLeaderboardChangeMessage {}", statusInfo);
+            }
         } catch (Exception e) {
             log.error("could not send new Leaderboard message", e);
         }
+    }
+
+    private Response postSlackMessage(String slackMessage) {
+        return postSlackMessage(new SlackPostMessageDto(slackMessage));
+    }
+
+    private Response postSlackMessage(SlackPostMessageDto slackPostMessageDto) {
+        log.debug("sendLeaderboardChangeMessage: {}", slackPostMessageDto);
+        return client.target(slackWebhookUrl).request().post(entity(slackPostMessageDto, APPLICATION_JSON));
     }
 
     private int findLongestName(Leaderboard leaderboard) {
@@ -189,4 +206,11 @@ public class AocSlackMessageService implements LeaderboardMessageService {
         this.slackWebhookUrl = slackWebhookUrl;
     }
 
+    @Data
+    @XmlRootElement
+    public static class SlackPostMessageDto {
+
+        private final String text;
+
+    }
 }
