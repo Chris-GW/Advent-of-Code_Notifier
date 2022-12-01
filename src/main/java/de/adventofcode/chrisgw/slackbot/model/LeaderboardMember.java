@@ -1,6 +1,8 @@
 package de.adventofcode.chrisgw.slackbot.model;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -60,8 +62,8 @@ public class LeaderboardMember implements Comparable<LeaderboardMember> {
     @Override
     public int compareTo(LeaderboardMember otherMember) {
         return new CompareToBuilder().append(this.getLocalScore(), otherMember.getLocalScore())
-                .append(this.getLastStarTs(), otherMember.getLastStarTs())
-                .append(this.getGlobalScore(), otherMember.getGlobalScore())
+                .append(otherMember.getLastStarTs(), this.getLastStarTs()) // smaller first
+                .append(this.getPrintName(), otherMember.getPrintName())
                 .toComparison() * -1;
     }
 

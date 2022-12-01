@@ -26,11 +26,11 @@ import static java.util.Objects.requireNonNull;
 @Service
 public class AocLeaderboardNotifier {
 
-    private AocLeaderboardService leaderboardService;
-    private ObjectMapper objectMapper;
+    private final AocLeaderboardService leaderboardService;
+    private final ObjectMapper objectMapper;
     private List<LeaderboardMessageService> messageServices = new ArrayList<>();
 
-    private Map<Long, Disposable> registerdLeaderbaords = new ConcurrentHashMap<>();
+    private final Map<Long, Disposable> registeredLeaderboards = new ConcurrentHashMap<>();
 
 
     @Inject
@@ -48,7 +48,7 @@ public class AocLeaderboardNotifier {
         LocalDate currentAocDate = currentAocDate();
         final int aocYear = Math.min(year, currentAocDate.getYear());
 
-        return registerdLeaderbaords.computeIfAbsent(leaderboardId, key -> {
+        return registeredLeaderboards.computeIfAbsent(leaderboardId, key -> {
             LeaderboardChange initialLeaderboardChange = loadLeaderboardChange(year, leaderboardId);
             log.debug("loadLeaderboardChange: {}", initialLeaderboardChange);
 
@@ -62,12 +62,15 @@ public class AocLeaderboardNotifier {
                     .skip(1)
                     .filter(LeaderboardChange::hasChanged)
                     .doOnNext(leaderboardChange -> log.debug("next for {}: {}", leaderboardId, leaderboardChange))
-                    .doOnError(error -> log.error("error for " + leaderboardId, error))
                     .doOnDispose(() -> log.debug("dispose for " + leaderboardId))
                     .doOnTerminate(() -> log.debug("terminate for " + leaderboardId))
-                    .doOnTerminate(() -> registerdLeaderbaords.remove(leaderboardId))
-                    .subscribe(this::notifyAboutLeaderboardChange);
+                    .doOnTerminate(() -> registeredLeaderboards.remove(leaderboardId))
+                    .subscribe(this::notifyAboutLeaderboardChange, this::onErrorByFetchingLeaderboard);
         });
+    }
+
+    private void onErrorByFetchingLeaderboard(Throwable throwable) {
+        log.error("onErrorByFetchingLeaderboard", throwable);
     }
 
 

@@ -48,7 +48,7 @@ public class AocLeaderboardNotifierConfig {
     }
 
 
-    @Bean
+    @Bean(destroyMethod = "close")
     public Client client(ObjectMapper objectMapper) {
         return ClientBuilder.newClient()
                 .register(new JacksonJaxbJsonProvider(objectMapper, JacksonJaxbJsonProvider.DEFAULT_ANNOTATIONS))
