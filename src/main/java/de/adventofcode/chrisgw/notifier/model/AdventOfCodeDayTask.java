@@ -1,4 +1,4 @@
-package de.adventofcode.chrisgw.aoc.notifier.model;
+package de.adventofcode.chrisgw.notifier.model;
 
 import lombok.Data;
 import org.apache.commons.lang3.builder.CompareToBuilder;

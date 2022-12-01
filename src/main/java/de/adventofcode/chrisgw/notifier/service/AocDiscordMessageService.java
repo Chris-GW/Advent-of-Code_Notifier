@@ -1,9 +1,9 @@
-package de.adventofcode.chrisgw.aoc.notifier.service;
+package de.adventofcode.chrisgw.notifier.service;
 
-import de.adventofcode.chrisgw.aoc.notifier.model.Leaderboard;
-import de.adventofcode.chrisgw.aoc.notifier.model.LeaderboardMember;
-import de.adventofcode.chrisgw.aoc.notifier.model.AdventOfCodeDayTask;
-import de.adventofcode.chrisgw.aoc.notifier.model.LeaderboardChange;
+import de.adventofcode.chrisgw.notifier.model.Leaderboard;
+import de.adventofcode.chrisgw.notifier.model.LeaderboardMember;
+import de.adventofcode.chrisgw.notifier.model.AdventOfCodeDayTask;
+import de.adventofcode.chrisgw.notifier.model.LeaderboardChange;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +23,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static de.adventofcode.chrisgw.aoc.notifier.service.AocSlackMessageService.DAY_TASK_DATE_TIME_PATTERN;
+import static de.adventofcode.chrisgw.notifier.service.AocSlackMessageService.DAY_TASK_DATE_TIME_PATTERN;
 import static java.util.Objects.requireNonNull;
 import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;

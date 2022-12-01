@@ -1,6 +1,6 @@
-package de.adventofcode.chrisgw.aoc.notifier.service;
+package de.adventofcode.chrisgw.notifier.service;
 
-import de.adventofcode.chrisgw.aoc.notifier.model.LeaderboardChange;
+import de.adventofcode.chrisgw.notifier.model.LeaderboardChange;
 
 
 public interface LeaderboardMessageService {

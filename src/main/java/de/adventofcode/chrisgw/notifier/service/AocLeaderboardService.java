@@ -1,9 +1,9 @@
-package de.adventofcode.chrisgw.aoc.notifier.service;
+package de.adventofcode.chrisgw.notifier.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.adventofcode.chrisgw.aoc.notifier.model.Leaderboard;
-import de.adventofcode.chrisgw.aoc.notifier.model.LeaderboardMember;
+import de.adventofcode.chrisgw.notifier.model.Leaderboard;
+import de.adventofcode.chrisgw.notifier.model.LeaderboardMember;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;

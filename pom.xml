@@ -138,7 +138,7 @@
             <configuration>
               <archive>
                 <manifest>
-                  <mainClass>de.adventofcode.chrisgw.aoc.notifier.AocLeaderboardNotifier</mainClass>
+                  <mainClass>de.adventofcode.chrisgw.notifier.AocLeaderboardNotifierConfig</mainClass>
                 </manifest>
               </archive>
               <descriptorRefs>
