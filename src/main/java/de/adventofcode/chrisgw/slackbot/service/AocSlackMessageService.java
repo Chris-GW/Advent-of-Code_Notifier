@@ -13,16 +13,16 @@ import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -37,8 +37,8 @@ public class AocSlackMessageService implements LeaderboardMessageService {
     public static final DateTimeFormatter DAY_TASK_DATE_TIME_PATTERN = DateTimeFormatter.ofPattern(
             "E. dd.MM. 'um' HH:mm");
 
+    private final Client client;
     private String slackWebhookUrl;
-    private Client client;
 
 
     @Inject
@@ -49,18 +49,23 @@ public class AocSlackMessageService implements LeaderboardMessageService {
 
     @Override
     public void sendLeaderboardChangeMessage(LeaderboardChange leaderboardChange) {
+        Response postMessageResponse = null;
         try {
             String leaderboardMessage = formatLeaderboardMessage(leaderboardChange);
             String leaderboardChangeMessage = formatLeaderboardChangeMessage(leaderboardChange);
-            Response postMessageResponse = postSlackMessage(leaderboardMessage + "\n" + leaderboardChangeMessage);
+            postMessageResponse = postSlackMessage(leaderboardMessage + "\n" + leaderboardChangeMessage);
             StatusType statusInfo = postMessageResponse.getStatusInfo();
-            if (!Status.OK.equals(statusInfo)) {
-                log.error("sendLeaderboardChangeMessage {}", statusInfo);
-            } else {
+            if (Family.SUCCESSFUL.equals(statusInfo.getFamily())) {
                 log.debug("sendLeaderboardChangeMessage {}", statusInfo);
+            } else {
+                log.error("sendLeaderboardChangeMessage {}", statusInfo);
             }
         } catch (Exception e) {
             log.error("could not send new Leaderboard message", e);
+        } finally {
+            if (postMessageResponse != null) {
+                postMessageResponse.close();
+            }
         }
     }
 
