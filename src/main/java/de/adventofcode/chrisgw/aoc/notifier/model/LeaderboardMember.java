@@ -1,4 +1,4 @@
-package de.adventofcode.chrisgw.slackbot.model;
+package de.adventofcode.chrisgw.aoc.notifier.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

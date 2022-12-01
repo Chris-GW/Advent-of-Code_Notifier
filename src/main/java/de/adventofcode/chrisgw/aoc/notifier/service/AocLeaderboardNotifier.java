@@ -1,8 +1,8 @@
-package de.adventofcode.chrisgw.slackbot.service;
+package de.adventofcode.chrisgw.aoc.notifier.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.adventofcode.chrisgw.slackbot.model.Leaderboard;
-import de.adventofcode.chrisgw.slackbot.model.LeaderboardChange;
+import de.adventofcode.chrisgw.aoc.notifier.model.Leaderboard;
+import de.adventofcode.chrisgw.aoc.notifier.model.LeaderboardChange;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.BehaviorSubject;
 import lombok.extern.slf4j.Slf4j;

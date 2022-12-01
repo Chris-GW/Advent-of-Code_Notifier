@@ -1,4 +1,4 @@
-package de.adventofcode.chrisgw.slackbot.model;
+package de.adventofcode.chrisgw.aoc.notifier.model;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy.SnakeCaseStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

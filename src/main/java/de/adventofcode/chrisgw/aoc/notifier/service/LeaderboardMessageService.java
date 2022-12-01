@@ -1,6 +1,6 @@
-package de.adventofcode.chrisgw.slackbot.service;
+package de.adventofcode.chrisgw.aoc.notifier.service;
 
-import de.adventofcode.chrisgw.slackbot.model.LeaderboardChange;
+import de.adventofcode.chrisgw.aoc.notifier.model.LeaderboardChange;
 
 
 public interface LeaderboardMessageService {

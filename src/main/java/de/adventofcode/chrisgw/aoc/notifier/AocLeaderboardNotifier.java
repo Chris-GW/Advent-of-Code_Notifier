@@ -1,12 +1,11 @@
-package de.adventofcode.chrisgw.slackbot;
+package de.adventofcode.chrisgw.aoc.notifier;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.VisibilityChecker.Std;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import de.adventofcode.chrisgw.slackbot.service.AocLeaderboardNotifier;
-import de.adventofcode.chrisgw.slackbot.service.AocLeaderboardService;
-import de.adventofcode.chrisgw.slackbot.service.AocSlackMessageService;
+import de.adventofcode.chrisgw.aoc.notifier.service.AocLeaderboardService;
+import de.adventofcode.chrisgw.aoc.notifier.service.AocSlackMessageService;
 import io.reactivex.disposables.Disposable;
 import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -24,15 +23,16 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.*;
 @Configuration
 @ComponentScan(basePackageClasses = { AocLeaderboardService.class, AocSlackMessageService.class })
 @PropertySource("file:advent-of-code.properties")
-public class AocLeaderboardNotifierConfig {
+public class AocLeaderboardNotifier {
 
 
     public static void main(String[] args) {
         ConfigurableApplicationContext applicationContext = new AnnotationConfigApplicationContext(
-                AocLeaderboardNotifierConfig.class);
+                AocLeaderboardNotifier.class);
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
 
-        AocLeaderboardNotifier aocLeaderboardNotifier = applicationContext.getBean(AocLeaderboardNotifier.class);
+        de.adventofcode.chrisgw.aoc.notifier.service.AocLeaderboardNotifier aocLeaderboardNotifier = applicationContext.getBean(
+                de.adventofcode.chrisgw.aoc.notifier.service.AocLeaderboardNotifier.class);
         if (!environment.containsProperty("leaderboardId")) {
             throw new IllegalArgumentException("leaderboardId was unset");
         }

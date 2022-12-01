@@ -1,10 +1,10 @@
-package de.adventofcode.chrisgw.slackbot.service;
+package de.adventofcode.chrisgw.aoc.notifier.service;
 
 
-import de.adventofcode.chrisgw.slackbot.model.AdventOfCodeDayTask;
-import de.adventofcode.chrisgw.slackbot.model.Leaderboard;
-import de.adventofcode.chrisgw.slackbot.model.LeaderboardChange;
-import de.adventofcode.chrisgw.slackbot.model.LeaderboardMember;
+import de.adventofcode.chrisgw.aoc.notifier.model.AdventOfCodeDayTask;
+import de.adventofcode.chrisgw.aoc.notifier.model.Leaderboard;
+import de.adventofcode.chrisgw.aoc.notifier.model.LeaderboardChange;
+import de.adventofcode.chrisgw.aoc.notifier.model.LeaderboardMember;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

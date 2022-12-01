@@ -1,4 +1,4 @@
-package de.adventofcode.chrisgw.slackbot.model;
+package de.adventofcode.chrisgw.aoc.notifier.model;
 
 import lombok.Data;
 import org.apache.commons.lang3.builder.CompareToBuilder;
